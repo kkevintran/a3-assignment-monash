@@ -44,8 +44,7 @@ const handleSubmit = async (e: Event) => {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
-    <div class="max-w-md w-full">
+  <div class="w-full max-w-md">
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 space-y-6">
         <div class="space-y-2">
           <h2 class="text-center text-2xl font-bold text-gray-900 dark:text-white">
@@ -149,7 +148,6 @@ const handleSubmit = async (e: Event) => {
         </div>
       </div>
     </div>
-  </div>
 </template>
 
 <style scoped>

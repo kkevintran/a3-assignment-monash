@@ -6,7 +6,27 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      redirect: '/signin'
+      name: 'home',
+      component: () => import('../views/HomeView.vue'),
+      meta: { requiresAuth: false }
+    },  
+    {
+      path: '/services',
+      name: 'services',
+      component: () => import('../views/ServicesView.vue'),
+      meta: { requiresAuth: false }
+    },
+    {
+      path: '/about',
+      name: 'about',
+      component: () => import('../views/AboutView.vue'),
+      meta: { requiresAuth: false }
+    },
+    {
+      path: '/contact',
+      name: 'contact',
+      component: () => import('../views/ContactView.vue'),
+      meta: { requiresAuth: false }
     },
     {
       path: '/signin',
