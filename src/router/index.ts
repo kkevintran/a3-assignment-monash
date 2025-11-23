@@ -1,0 +1,50 @@
+import { createRouter, createWebHistory } from 'vue-router'
+import type { RouteLocationNormalized, NavigationGuardNext } from 'vue-router'
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes: [
+    {
+      path: '/',
+      redirect: '/signin'
+    },
+    {
+      path: '/signin',
+      name: 'signin',
+      component: () => import('../views/SignInView.vue'),
+      meta: { requiresAuth: false }
+    },
+    {
+      path: '/signup',
+      name: 'signup',
+      component: () => import('../views/SignUpView.vue'),
+      meta: { requiresAuth: false }
+    },
+    {
+      path: '/dashboard',
+      name: 'dashboard',
+      component: () => import('../views/DashboardView.vue'),
+      meta: { requiresAuth: true }
+    }
+  ]
+})
+
+// Navigation guard to check authentication
+router.beforeEach((to: RouteLocationNormalized, _from: RouteLocationNormalized, next: NavigationGuardNext) => {
+  // Get auth state from localStorage or a global store
+  // For now, we'll check if user is authenticated via Firebase
+  // This will be handled in the component level since we need Firebase instance
+  
+  // Allow navigation to login page if not authenticated
+  if (to.meta.requiresAuth === false) {
+    next()
+    return
+  }
+  
+  // For protected routes, we'll handle redirect in the component
+  // This is because we need access to Firebase auth instance
+  next()
+})
+
+export default router
+
