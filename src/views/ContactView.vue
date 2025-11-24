@@ -1,27 +1,37 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import NavBar from '../components/NavBar.vue'
+import { useSendGrid } from '../composables/useSendGrid'
 
 const name = ref('')
 const email = ref('')
 const message = ref('')
 const isSubmitting = ref(false)
 
+const { sendContactFormEmail } = useSendGrid()
 const handleSubmit = async (e: Event) => {
   e.preventDefault()
   isSubmitting.value = true
-  
-  // Handle form submission here
-  console.log('Form submitted:', { name: name.value, email: email.value, message: message.value })
-  
-  setTimeout(() => {
-    isSubmitting.value = false
-    // Reset form
+  console.log('Sending contact form email to:', 'hikevintran@gmail.com')
+  console.log('Name:', name.value)
+  console.log('Email:', email.value)
+  console.log('Message:', message.value)
+  try {
+    await sendContactFormEmail(name.value, email.value, message.value, 'hikevintran@gmail.com')
+    alert('Thank you for your message! We will get back to you soon.')
     name.value = ''
     email.value = ''
     message.value = ''
-    alert('Thank you for your message! We will get back to you soon.')
-  }, 1000)
+  } catch (error) {
+    console.error('Error sending contact form email:', error)
+  } finally {
+    isSubmitting.value = false
+    name.value = ''
+    email.value = ''
+    message.value = ''
+  }
+
+
 }
 </script>
 
