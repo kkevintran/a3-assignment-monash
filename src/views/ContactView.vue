@@ -24,11 +24,9 @@ const handleSubmit = async (e: Event) => {
     message.value = ''
   } catch (error) {
     console.error('Error sending contact form email:', error)
+    alert('Failed to send message. Please try again later.')
   } finally {
     isSubmitting.value = false
-    name.value = ''
-    email.value = ''
-    message.value = ''
   }
 
 

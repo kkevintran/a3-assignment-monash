@@ -41,13 +41,13 @@ app.post(
 
     try {
       await sgMail.send({
-        to,
-        from: FROM_EMAIL,
+        to, // recipient email
+        from: FROM_EMAIL, // sender email
         subject,
-        text,
-        html,
+        text, // email body
+        html, // email body in HTML format
       });
-
+    
       return res.json({ success: true });
     } catch (error: any) {
       console.error("SendGrid error:", error);

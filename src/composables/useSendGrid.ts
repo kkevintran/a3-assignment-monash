@@ -1,46 +1,67 @@
-import sgMail from '@sendgrid/mail'
-
 /**
- * Composable for sending emails via SendGrid
- * 
- * IMPORTANT SECURITY NOTE:
- * Using SendGrid API key client-side exposes it to users.
- * For production, consider using Firebase Cloud Functions or a backend API
- * to keep your API key secure.
+ * Composable for sending emails via SendGrid through the backend API
  */
 export function useSendGrid() {
-  const apiKey = import.meta.env.VITE_SENDGRID_API_KEY
-  
-  if (!apiKey) {
-    throw new Error('SendGrid API key not found. Please set VITE_SENDGRID_API_KEY in your .env file')
-  }
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 
-  sgMail.setApiKey(apiKey)
-
-  const sendEmail = async (to: string, from: string, subject: string, text: string, html?: string) => {
+  const sendEmail = async (to: string, subject: string, text: string, html?: string) => {
     try {
-      const msg = {
-        to,
-        from,
-        subject,
-        text,
-        html: html || text,
+      const response = await fetch(`${apiUrl}/api/send-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to,
+          subject,
+          text,
+          html: html || text,
+        }),
+      })
+
+      const contentType = response.headers.get('content-type')
+      const isJson = contentType && contentType.includes('application/json')
+
+      if (!response.ok) {
+        let errorMessage = `Server error: ${response.status} ${response.statusText}`
+        
+        if (isJson) {
+          try {
+            const errorData = await response.json()
+            errorMessage = errorData.error || errorMessage
+          } catch (e) {
+            // If JSON parsing fails, use the default error message
+          }
+        } else {
+          // If response is HTML (like a 404 page), provide a helpful error
+          const text = await response.text()
+          if (text.includes('<!DOCTYPE') || text.includes('<html')) {
+            errorMessage = `Server not responding correctly. Make sure the server is running on ${apiUrl}`
+          }
+        }
+        
+        throw new Error(errorMessage)
       }
 
-      await sgMail.send(msg)
-      return { success: true }
+      if (!isJson) {
+        throw new Error('Server returned non-JSON response')
+      }
+
+      return await response.json()
     } catch (error: any) {
       console.error('SendGrid error:', error)
-      if (error.response) {
-        console.error('Error response body:', error.response.body)
+      
+      // Provide more helpful error messages
+      if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+        throw new Error(`Cannot connect to server at ${apiUrl}. Make sure the server is running.`)
       }
+      
       throw new Error(error.message || 'Failed to send email')
     }
   }
 
   const sendContactFormEmail = async (name: string, email: string, message: string, recipientEmail?: string) => {
-    const fromEmail = import.meta.env.VITE_SENDGRID_FROM_EMAIL || 'noreply@example.com'
-    const toEmail = recipientEmail || import.meta.env.VITE_SENDGRID_TO_EMAIL || fromEmail
+    const toEmail = recipientEmail || import.meta.env.VITE_SENDGRID_TO_EMAIL || 'ktra0069@student.monash.edu'
     
     const subject = `New Contact Form Submission from ${name}`
     const text = `
@@ -65,7 +86,7 @@ export function useSendGrid() {
       </div>
     `
 
-    return await sendEmail(toEmail, fromEmail, subject, text, html)
+    return await sendEmail(toEmail, subject, text, html)
   }
 
   return {
