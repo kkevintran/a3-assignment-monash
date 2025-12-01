@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import NavBar from '../components/NavBar.vue'
 </script>
 
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-    <NavBar />
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
         <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-6">

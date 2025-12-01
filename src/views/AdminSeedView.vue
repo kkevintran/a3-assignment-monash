@@ -3,7 +3,6 @@ import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useFirebaseAuth } from '../composables/useFirebaseAuth'
 import { useFirestore } from '../composables/useFirestore'
-import NavBar from '../components/NavBar.vue'
 
 const router = useRouter()
 const { user, userRole, loading: authLoading } = useFirebaseAuth()
@@ -49,7 +48,6 @@ const handleSeed = async () => {
 
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-    <NavBar />
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">

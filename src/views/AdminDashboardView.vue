@@ -2,7 +2,6 @@
 import { watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useFirebaseAuth } from '../composables/useFirebaseAuth'
-import NavBar from '../components/NavBar.vue'
 
 const router = useRouter()
 const { user, userRole, logout, loading } = useFirebaseAuth()
@@ -26,7 +25,6 @@ const handleLogout = async () => {
 
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-    <NavBar />
     <div v-if="loading" class="min-h-screen flex items-center justify-center">
       <p class="text-gray-600 dark:text-gray-400">Loading...</p>
     </div>

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { watch } from 'vue'
 import { useRouter } from 'vue-router'
-import NavBar from '../components/NavBar.vue'
 import SignInForm from '../components/SignInForm.vue'
 import { useFirebaseAuth } from '../composables/useFirebaseAuth'
 
@@ -18,7 +17,6 @@ watch(user, (newUser) => {
 
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
-    <NavBar />
     <div class="flex-1 flex items-center justify-center px-4">
       <SignInForm />
     </div>

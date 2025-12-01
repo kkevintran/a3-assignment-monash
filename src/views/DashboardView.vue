@@ -2,11 +2,11 @@
 import { watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useFirebaseAuth } from '../composables/useFirebaseAuth'
-import NavBar from '../components/NavBar.vue'
 import AdminSeedJobs from '../components/AdminSeedJobs.vue'
+import DashboardSidebar from '../components/DashboardSidebar.vue'
 
 const router = useRouter()
-const { user, userRole, logout, loading } = useFirebaseAuth()
+const { user, userRole, loading } = useFirebaseAuth()
 
 // Redirect to login if not authenticated
 watch([user, loading], ([newUser, isLoading]) => {
@@ -15,41 +15,32 @@ watch([user, loading], ([newUser, isLoading]) => {
   }
 }, { immediate: true })
 
-const handleLogout = async () => {
-  await logout()
-  router.push('/')
-}
-
 const isAdmin = () => userRole.value === 'admin'
 </script>
 
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-    <NavBar />
     <div v-if="loading" class="min-h-screen flex items-center justify-center">
       <p class="text-gray-600 dark:text-gray-400">Loading...</p>
     </div>
-    <div v-else-if="user" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
-        <div class="flex items-center justify-between mb-6">
-          <div>
+    <div v-else-if="user" class="flex">
+      <!-- Sidebar -->
+      <DashboardSidebar />
+      
+      <!-- Main Content -->
+      <main class="flex-1 p-8">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+          <div class="mb-6">
             <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
               Dashboard
             </h1>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Signed in as: <strong class="text-gray-900 dark:text-white">{{ user.email }}</strong>
+              Welcome back, <strong class="text-gray-900 dark:text-white">{{ user.email }}</strong>
               <span v-if="isAdmin()" class="ml-2 px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-semibold rounded">
                 Admin
               </span>
             </p>
           </div>
-          <button
-            @click="handleLogout"
-            class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md font-medium"
-          >
-            Sign Out
-          </button>
-        </div>
 
         <div class="space-y-6">
           <!-- Admin-only section -->
@@ -136,6 +127,7 @@ const isAdmin = () => userRole.value === 'admin'
           </div>
         </div>
       </div>
+      </main>
     </div>
   </div>
 </template>
