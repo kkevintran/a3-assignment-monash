@@ -1,6 +1,6 @@
 import { inject, ref, onMounted, onUnmounted } from 'vue'
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, type User } from 'firebase/auth'
-import { getFirestore, setDoc, doc } from 'firebase/firestore'
+import { getFirestore, setDoc, doc, getDoc } from 'firebase/firestore'
 import { getStorage, ref as firebaseStorageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 import type { FirebaseApp } from 'firebase/app'
 
@@ -15,15 +15,37 @@ export function useFirebaseAuth() {
   const db = getFirestore(firebaseApp)
   const storage = getStorage(firebaseApp)
   const user = ref<User | null>(null)
+  const userRole = ref<string | null>(null)
   const loading = ref(true)
   const error = ref<string | null>(null)
+
+  // Fetch user role from Firestore
+  const fetchUserRole = async (userId: string) => {
+    try {
+      const userDoc = await getDoc(doc(db, 'users', userId))
+      if (userDoc.exists()) {
+        const userData = userDoc.data()
+        userRole.value = userData.role || 'user'
+      } else {
+        userRole.value = 'user' // Default role if document doesn't exist
+      }
+    } catch (err) {
+      console.error('Error fetching user role:', err)
+      userRole.value = 'user' // Default on error
+    }
+  }
 
   // Listen to auth state changes
   let unsubscribe: (() => void) | null = null
 
   onMounted(() => {
-    unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       user.value = firebaseUser
+      if (firebaseUser) {
+        await fetchUserRole(firebaseUser.uid)
+      } else {
+        userRole.value = null
+      }
       loading.value = false
       error.value = null
     })
@@ -134,12 +156,16 @@ export function useFirebaseAuth() {
 
   return {
     user,
+    userRole,
     loading,
     error,
     signIn,
     signUp,
     logout,
-    isAuthenticated: () => user.value !== null
+    fetchUserRole,
+    isAuthenticated: () => user.value !== null,
+    isAdmin: () => userRole.value === 'admin',
+    isEmployer: () => userRole.value === 'employer'
   }
 }
 

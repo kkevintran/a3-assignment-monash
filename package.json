@@ -10,7 +10,8 @@
     "type-check": "vue-tsc --noEmit",
     "server:dev": "tsx watch server/index.ts",
     "server:build": "tsc -p tsconfig.json",
-    "server:start": "node dist-server/index.js"
+    "server:start": "node dist-server/index.js",
+    "seed:jobs": "tsx scripts/seedJobs.ts"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",
@@ -31,6 +32,7 @@
     "@types/express": "^5.0.5",
     "@vitejs/plugin-vue": "^6.0.1",
     "@vue/tsconfig": "^0.8.1",
+    "firebase-admin": "^13.6.0",
     "tailwindcss": "^4.1.17",
     "ts-node-dev": "^2.0.0",
     "tsx": "^4.20.6",

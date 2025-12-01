@@ -8,7 +8,7 @@ import { useFirebaseAuth } from '../composables/useFirebaseAuth'
 const router = useRouter()
 const { user, loading } = useFirebaseAuth()
 
-// Redirect to dashboard when user is authenticated
+// Redirect to dashboard when user is authenticated (both admin and regular users)
 watch(user, (newUser) => {
   if (newUser && !loading.value) {
     router.push('/dashboard')

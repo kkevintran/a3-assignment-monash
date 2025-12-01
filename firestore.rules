@@ -50,6 +50,44 @@ service cloud.firestore {
       // Only admins can update/delete
       allow update, delete: if isAuthenticated() && isAdmin();
     }
+    
+    // Jobs collection
+    match /jobs/{jobId} {
+      // Anyone can read active jobs
+      allow read: if resource.data.status == 'active' || 
+                  (isAuthenticated() && (resource.data.postedBy == request.auth.uid || isAdmin()));
+      
+      // TEMPORARY: Allow any authenticated user to create jobs (for seeding)
+      // TODO: Restrict this to only employers/admins after seeding:
+      // allow create: if isAuthenticated() && 
+      //               (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'employer' || 
+      //                get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+      allow create: if isAuthenticated();
+      
+      // Only job poster or admin can update
+      allow update: if isAuthenticated() && 
+                    (resource.data.postedBy == request.auth.uid || isAdmin());
+      
+      // Only admin can delete
+      allow delete: if isAuthenticated() && isAdmin();
+      
+      // Applications subcollection
+      match /applications/{applicationId} {
+        // Users can read their own applications
+        allow read: if isAuthenticated() && 
+                    (resource.data.userId == request.auth.uid || 
+                     get(/databases/$(database)/documents/jobs/$(jobId)).data.postedBy == request.auth.uid ||
+                     isAdmin());
+        
+        // Users can create their own applications
+        allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+        
+        // Job poster or admin can update application status
+        allow update: if isAuthenticated() && 
+                      (get(/databases/$(database)/documents/jobs/$(jobId)).data.postedBy == request.auth.uid ||
+                       isAdmin());
+      }
+    }
   }
 }
 
