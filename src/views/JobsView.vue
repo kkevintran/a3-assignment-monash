@@ -5,13 +5,12 @@ import { useFirebaseAuth } from '../composables/useFirebaseAuth'
 import { useFirestore } from '../composables/useFirestore'
 import DashboardSidebar from '../components/DashboardSidebar.vue'
 import JobCard from '../components/JobCard.vue'
-import JobSearchBar from '../components/JobSearchBar.vue'
 import JobDetailsModal from '../components/JobDetailsModal.vue'
 import ApplicationForm from '../components/ApplicationForm.vue'
 
 const router = useRouter()
 const { user, loading: authLoading } = useFirebaseAuth()
-const { getActiveJobs, getActiveJobsCount, applyToJob, getJobById } = useFirestore()
+const { getActiveJobs, getActiveJobsCount, getJobById } = useFirestore()
 
 const allJobs = ref<any[]>([])
 const allFilteredJobs = ref<any[]>([]) // For client-side search pagination
@@ -280,36 +279,6 @@ onMounted(() => {
   }
 })
 
-const formatDate = (date: any) => {
-  if (!date) return 'N/A'
-  const d = date?.toDate ? date.toDate() : new Date(date)
-  return d.toLocaleDateString('en-US', { 
-    year: 'numeric', 
-    month: 'short', 
-    day: 'numeric' 
-  })
-}
-
-const formatSalary = (salary: any) => {
-  if (!salary) return 'Not specified'
-  const { min, max, currency, period } = salary
-  const periodText = period === 'yearly' ? 'year' : period === 'monthly' ? 'month' : 'hour'
-  return `${currency} ${min.toLocaleString()} - ${max.toLocaleString()}/${periodText === 'year' ? 'yr' : periodText === 'month' ? 'mo' : 'hr'}`
-}
-
-const getRatingStars = (rating: number) => {
-  const fullStars = Math.floor(rating)
-  const hasHalfStar = rating % 1 >= 0.5
-  const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0)
-  return { fullStars, hasHalfStar, emptyStars }
-}
-
-const formatNumber = (num: number) => {
-  if (num >= 1000) {
-    return (num / 1000).toFixed(1) + 'k'
-  }
-  return num.toString()
-}
 
 const openJobModal = async (job: any) => {
   try {
