@@ -47,6 +47,18 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/dashboard/applications',
+      name: 'applications',
+      component: () => import('../views/ApplicationsView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/dashboard/jobs',
+      name: 'jobs',
+      component: () => import('../views/JobsView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/admin',
       name: 'admin-dashboard',
       component: () => import('../views/AdminDashboardView.vue'),

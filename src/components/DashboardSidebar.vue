@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
+import { computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useFirebaseAuth } from '../composables/useFirebaseAuth'
 
 const router = useRouter()
+const route = useRoute()
 const { logout, user } = useFirebaseAuth()
 
 const handleLogout = async () => {
@@ -13,10 +15,17 @@ const handleLogout = async () => {
 const navigateTo = (path: string) => {
   router.push(path)
 }
+
+const isActive = (path: string) => {
+  if (path === '/dashboard') {
+    return route.path === '/dashboard'
+  }
+  return route.path === path || route.path.startsWith(path + '/')
+}
 </script>
 
 <template>
-  <aside class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 min-h-screen">
+  <aside class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 fixed left-0 top-0 h-screen overflow-y-auto">
     <div class="flex flex-col h-full">
       <!-- Header -->
       <div class="p-6 border-b border-gray-200 dark:border-gray-700">
@@ -31,9 +40,22 @@ const navigateTo = (path: string) => {
         <!-- Profile Menu Item -->
         <button
           @click="navigateTo('/dashboard/profile')"
-          class="w-full flex items-center px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors group"
+          :class="[
+            'w-full flex items-center px-4 py-3 text-left rounded-lg transition-colors group',
+            isActive('/dashboard/profile')
+              ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-l-4 border-blue-600'
+              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+          ]"
         >
-          <svg class="w-5 h-5 mr-3 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg 
+            :class="[
+              'w-5 h-5 mr-3',
+              isActive('/dashboard/profile')
+                ? 'text-blue-600 dark:text-blue-400'
+                : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200'
+            ]"
+            fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          >
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
           <span class="font-medium">Profile</span>
@@ -42,9 +64,22 @@ const navigateTo = (path: string) => {
         <!-- Applications Menu Item -->
         <button
           @click="navigateTo('/dashboard/applications')"
-          class="w-full flex items-center px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors group"
+          :class="[
+            'w-full flex items-center px-4 py-3 text-left rounded-lg transition-colors group',
+            isActive('/dashboard/applications')
+              ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-l-4 border-blue-600'
+              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+          ]"
         >
-          <svg class="w-5 h-5 mr-3 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg 
+            :class="[
+              'w-5 h-5 mr-3',
+              isActive('/dashboard/applications')
+                ? 'text-blue-600 dark:text-blue-400'
+                : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200'
+            ]"
+            fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          >
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
           <span class="font-medium">Applications</span>
@@ -53,9 +88,22 @@ const navigateTo = (path: string) => {
         <!-- Jobs Menu Item -->
         <button
           @click="navigateTo('/dashboard/jobs')"
-          class="w-full flex items-center px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors group"
+          :class="[
+            'w-full flex items-center px-4 py-3 text-left rounded-lg transition-colors group',
+            isActive('/dashboard/jobs')
+              ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-l-4 border-blue-600'
+              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+          ]"
         >
-          <svg class="w-5 h-5 mr-3 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg 
+            :class="[
+              'w-5 h-5 mr-3',
+              isActive('/dashboard/jobs')
+                ? 'text-blue-600 dark:text-blue-400'
+                : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200'
+            ]"
+            fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          >
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <span class="font-medium">Jobs</span>

@@ -10,6 +10,7 @@ import {
   where, 
   orderBy, 
   limit,
+  startAfter,
   updateDoc,
   increment,
   arrayUnion,
@@ -148,25 +149,37 @@ export function useFirestore() {
   }
 
   /**
-   * Get all active job listings
+   * Get all active job listings with pagination
    */
-  const getActiveJobs = async (limitCount?: number) => {
+  const getActiveJobs = async (limitCount: number = 10, startAfterDoc?: any) => {
     try {
       let q = query(
         collection(db, 'jobs'),
         where('status', '==', 'active'),
-        orderBy('postedAt', 'desc')
+        orderBy('postedAt', 'desc'),
+        limit(limitCount)
       )
       
-      if (limitCount) {
-        q = query(q, limit(limitCount))
+      // Add startAfter if provided for pagination
+      if (startAfterDoc) {
+        q = query(q, startAfter(startAfterDoc))
       }
       
       const querySnapshot = await getDocs(q)
-      return querySnapshot.docs.map(doc => ({
+      const jobs = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }))
+      
+      const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1]
+      const hasMore = querySnapshot.docs.length === limitCount
+      
+      return {
+        jobs,
+        hasMore,
+        lastDoc: hasMore ? lastDoc : null,
+        firstDoc: querySnapshot.docs.length > 0 ? querySnapshot.docs[0] : null
+      }
     } catch (error: any) {
       console.error('Firestore error:', error)
       throw new Error(error.message || 'Failed to fetch jobs')
@@ -413,6 +426,86 @@ export function useFirestore() {
   }
 
   /**
+   * Get applications for a specific user with pagination
+   * Returns applications with job details, paginated to first 10 by default
+   */
+  const getUserApplications = async (userId: string, limitCount: number = 10) => {
+    try {
+      // First, get all jobs where the user is in the applicants array
+      const jobsQuery = query(
+        collection(db, 'jobs'),
+        where('applicants', 'array-contains', userId)
+      )
+      
+      const jobsSnapshot = await getDocs(jobsQuery)
+      const applications: Array<{
+        id: string
+        jobId: string
+        job: any
+        application: any
+      }> = []
+
+      // For each job, fetch the application document
+      for (const jobDoc of jobsSnapshot.docs) {
+        const jobId = jobDoc.id
+        const jobData = jobDoc.data()
+        
+        // Query applications subcollection for this user's application
+        const applicationsQuery = query(
+          collection(db, 'jobs', jobId, 'applications'),
+          where('userId', '==', userId)
+        )
+        
+        const applicationsSnapshot = await getDocs(applicationsQuery)
+        
+        // There should be only one application per job per user
+        applicationsSnapshot.forEach((appDoc) => {
+          const appData = appDoc.data()
+          applications.push({
+            id: appDoc.id,
+            jobId,
+            job: {
+              id: jobId,
+              ...jobData
+            },
+            application: {
+              id: appDoc.id,
+              ...appData,
+              // Convert Firestore Timestamp to Date if needed
+              appliedAt: appData.appliedAt?.toDate ? appData.appliedAt.toDate() : appData.appliedAt
+            }
+          })
+        })
+      }
+
+      // Sort by appliedAt date (most recent first)
+      applications.sort((a, b) => {
+        const dateA = a.application.appliedAt instanceof Date 
+          ? a.application.appliedAt.getTime() 
+          : new Date(a.application.appliedAt).getTime()
+        const dateB = b.application.appliedAt instanceof Date 
+          ? b.application.appliedAt.getTime() 
+          : new Date(b.application.appliedAt).getTime()
+        return dateB - dateA
+      })
+
+      const total = applications.length
+      const paginatedApplications = applications.slice(0, limitCount)
+      const hasMore = total > limitCount
+
+      return {
+        applications: paginatedApplications,
+        total,
+        hasMore,
+        limit: limitCount
+      }
+    } catch (error: any) {
+      console.error('Firestore error:', error)
+      throw new Error(error.message || 'Failed to fetch user applications')
+    }
+  }
+
+  /**
    * Seed database with mock jobs (for admin/development use)
    * Uses client SDK, so user must be authenticated and have proper permissions
    */
@@ -487,6 +580,7 @@ export function useFirestore() {
     getActiveJobs,
     getJobById,
     applyToJob,
+    getUserApplications,
     rateJob,
     saveJob,
     incrementJobViews,

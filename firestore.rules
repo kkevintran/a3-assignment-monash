@@ -54,8 +54,15 @@ service cloud.firestore {
     // Jobs collection
     match /jobs/{jobId} {
       // Anyone can read active jobs
+      // Users can read jobs they posted
+      // Users can read jobs where they are in the applicants array (for viewing their applications)
+      // Admins can read any job
       allow read: if resource.data.status == 'active' || 
-                  (isAuthenticated() && (resource.data.postedBy == request.auth.uid || isAdmin()));
+                  (isAuthenticated() && (
+                    resource.data.postedBy == request.auth.uid || 
+                    (resource.data.applicants != null && request.auth.uid in resource.data.applicants) ||
+                    isAdmin()
+                  ));
       
       // TEMPORARY: Allow any authenticated user to create jobs (for seeding)
       // TODO: Restrict this to only employers/admins after seeding:
@@ -74,6 +81,8 @@ service cloud.firestore {
       // Applications subcollection
       match /applications/{applicationId} {
         // Users can read their own applications
+        // Job poster can read applications for their job
+        // Admins can read any application
         allow read: if isAuthenticated() && 
                     (resource.data.userId == request.auth.uid || 
                      get(/databases/$(database)/documents/jobs/$(jobId)).data.postedBy == request.auth.uid ||

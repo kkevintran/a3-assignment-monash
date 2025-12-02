@@ -28,7 +28,7 @@ const isAdmin = () => userRole.value === 'admin'
       <DashboardSidebar />
       
       <!-- Main Content -->
-      <main class="flex-1 p-8">
+      <main class="flex-1 ml-64 p-8 overflow-y-auto h-screen">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
           <div class="mb-6">
             <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
