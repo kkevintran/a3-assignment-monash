@@ -86,7 +86,10 @@ const handleLogout = async () => {
           </div>
 
           <!-- Manage Users Card -->
-          <div class="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-6">
+          <router-link
+            to="/admin/users"
+            class="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-6 hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors"
+          >
             <div class="flex items-center mb-4">
               <div class="bg-purple-600 rounded-lg p-3">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -100,7 +103,7 @@ const handleLogout = async () => {
             <p class="text-sm text-gray-600 dark:text-gray-400">
               View and manage user accounts and permissions
             </p>
-          </div>
+          </router-link>
 
           <!-- Analytics Card -->
           <div class="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-6">

@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import SignInForm from '../components/SignInForm.vue'
 import SignUpForm from '../components/SignUpForm.vue'
 import { useFirebaseAuth } from '../composables/useFirebaseAuth'
 
 const router = useRouter()
+const route = useRoute()
 const { user, loading } = useFirebaseAuth()
 const showSignUp = ref(false)
 
@@ -18,9 +19,12 @@ const switchToSignIn = () => {
 }
 
 // Redirect to dashboard when user is authenticated
-watch(user, (newUser) => {
-  if (newUser && !loading.value) {
-    router.push('/dashboard')
+watch([user, loading], ([newUser, isLoading]) => {
+  if (!isLoading && newUser && (route.path === '/login' || route.path === '/signin')) {
+    // Small delay to ensure auth state is fully updated
+    setTimeout(() => {
+      router.push('/dashboard')
+    }, 100)
   }
 }, { immediate: true })
 </script>

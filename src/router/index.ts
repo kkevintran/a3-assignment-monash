@@ -59,6 +59,12 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/dashboard/profile',
+      name: 'profile',
+      component: () => import('../views/ProfileView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/admin',
       name: 'admin-dashboard',
       component: () => import('../views/AdminDashboardView.vue'),
@@ -69,6 +75,12 @@ const router = createRouter({
       name: 'admin-seed',
       component: () => import('../views/AdminSeedView.vue'),
       meta: { requiresAuth: false }
+    },
+    {
+      path: '/dashboard/users',
+      name: 'dashboard-users',
+      component: () => import('../views/AdminUsersView.vue'),
+      meta: { requiresAuth: true }
     }
   ]
 })

@@ -20,9 +20,10 @@ const handleSubmit = async (e: Event) => {
   try {
     isSubmitting.value = true
     await signIn(email.value, password.value)
-    // Success - auth state will update automatically
+    // Success - redirect to dashboard
     email.value = ''
     password.value = ''
+    router.push('/dashboard')
   } catch (err) {
     // Error is handled by the composable
     console.error('Sign in error:', err)

@@ -49,7 +49,17 @@ export function useFirestore() {
       return downloadURL
     } catch (error: any) {
       console.error('Storage upload error:', error)
-      throw new Error(error.message || 'Failed to upload file')
+      
+      // Provide more helpful error messages
+      if (error.code === 'storage/unauthorized' || error.code === 'permission-denied') {
+        throw new Error('Permission denied. Please make sure you are logged in and Firebase Storage is enabled.')
+      } else if (error.code === 'storage/unauthenticated') {
+        throw new Error('You must be logged in to upload files.')
+      } else if (error.message?.includes('CORS') || error.message?.includes('preflight')) {
+        throw new Error('Firebase Storage is not enabled. Please enable it in the Firebase Console: https://console.firebase.google.com/project/monash-a3/storage')
+      }
+      
+      throw new Error(error.message || 'Failed to upload file. Please ensure Firebase Storage is enabled.')
     }
   }
 
@@ -149,6 +159,23 @@ export function useFirestore() {
   }
 
   /**
+   * Get total count of active jobs
+   */
+  const getActiveJobsCount = async () => {
+    try {
+      const q = query(
+        collection(db, 'jobs'),
+        where('status', '==', 'active')
+      )
+      const querySnapshot = await getDocs(q)
+      return querySnapshot.size
+    } catch (error: any) {
+      console.error('Firestore error:', error)
+      throw new Error(error.message || 'Failed to fetch job count')
+    }
+  }
+
+  /**
    * Get all active job listings with pagination
    */
   const getActiveJobs = async (limitCount: number = 10, startAfterDoc?: any) => {
@@ -205,6 +232,49 @@ export function useFirestore() {
     } catch (error: any) {
       console.error('Firestore error:', error)
       throw new Error(error.message || 'Failed to fetch job')
+    }
+  }
+
+  /**
+   * Get user profile data
+   */
+  const getUserProfile = async (userId: string) => {
+    try {
+      const docRef = doc(db, 'users', userId)
+      const docSnap = await getDoc(docRef)
+      
+      if (!docSnap.exists()) {
+        throw new Error('User profile not found')
+      }
+      
+      return {
+        id: docSnap.id,
+        ...docSnap.data()
+      }
+    } catch (error: any) {
+      console.error('Firestore error:', error)
+      throw new Error(error.message || 'Failed to fetch user profile')
+    }
+  }
+
+  /**
+   * Get all users (admin only)
+   */
+  const getAllUsers = async () => {
+    try {
+      const q = query(
+        collection(db, 'users'),
+        orderBy('createdAt', 'desc')
+      )
+      const querySnapshot = await getDocs(q)
+      const users = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }))
+      return users
+    } catch (error: any) {
+      console.error('Firestore error:', error)
+      throw new Error(error.message || 'Failed to fetch users')
     }
   }
 
@@ -578,7 +648,10 @@ export function useFirestore() {
     // Job-related functions
     createJobListing,
     getActiveJobs,
+    getActiveJobsCount,
     getJobById,
+    getUserProfile,
+    getAllUsers,
     applyToJob,
     getUserApplications,
     rateJob,

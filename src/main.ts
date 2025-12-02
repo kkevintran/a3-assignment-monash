@@ -18,10 +18,19 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
+// Initialize Firebase
 const firebaseApp = initializeApp(firebaseConfig);
 
+// Create Vue app instance
 const vueApp = createApp(App);
+
+// Provide Firebase app instance to all components via Vue's injection system
+// This allows composables like useFirebaseAuth and useFirestore to inject('firebaseApp')
 vueApp.provide('firebaseApp', firebaseApp);
+
+// Install router plugin
 vueApp.use(router);
+
+// Mount the app to the DOM
 vueApp.mount('#app')
 

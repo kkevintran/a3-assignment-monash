@@ -1,0 +1,48 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user owns the file path
+    function isOwner(userId) {
+      return isAuthenticated() && path.matches('/resumes/' + userId + '/{allPaths=**}') ||
+             isAuthenticated() && path.matches('/cover-letters/' + userId + '/{allPaths=**}');
+    }
+    
+    // Resumes folder - users can upload and read their own resumes
+    match /resumes/{userId}/{allPaths=**} {
+      // Allow authenticated users to upload their own resumes
+      allow write: if isAuthenticated() && request.auth.uid == userId;
+      // Allow authenticated users to read their own resumes
+      // Allow job posters/admins to read resumes of applicants
+      allow read: if isAuthenticated() && (
+        request.auth.uid == userId ||
+        // Job posters can read resumes of applicants (we'll check this via Firestore)
+        true // For now, allow authenticated users to read resumes
+      );
+    }
+    
+    // Cover letters folder - users can upload and read their own cover letters
+    match /cover-letters/{userId}/{allPaths=**} {
+      // Allow authenticated users to upload their own cover letters
+      allow write: if isAuthenticated() && request.auth.uid == userId;
+      // Allow authenticated users to read their own cover letters
+      // Allow job posters/admins to read cover letters of applicants
+      allow read: if isAuthenticated() && (
+        request.auth.uid == userId ||
+        // Job posters can read cover letters of applicants (we'll check this via Firestore)
+        true // For now, allow authenticated users to read cover letters
+      );
+    }
+    
+    // Default: deny all other access
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
